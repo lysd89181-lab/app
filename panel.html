@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة المفاتيح — Media Plus</title>
+<style>
+:root{--teal:#0f766e;--teal-d:#115e59;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
+  --bg:#f6f8fa;--red:#dc2626;--green:#16a34a;--indigo:#4f46e5}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;font-size:14px}
+input{font-family:inherit;font-size:16px;padding:14px;border:1.5px solid var(--line);
+  border-radius:12px;background:#fff;width:100%;color:var(--ink)}
+input:focus{outline:none;border-color:var(--teal)}
+.num{font-variant-numeric:tabular-nums}
+
+/* بوابة كلمة المرور */
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:radial-gradient(circle at 30% 20%,#14857a,#0c3d38 75%)}
+.gbox{background:#fff;padding:32px;border-radius:22px;width:390px;max-width:100%;
+  box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.logo{font-size:25px;font-weight:800;color:var(--teal);line-height:1.15}
+.logo small{display:block;font-size:10px;color:var(--muted);letter-spacing:2.5px;margin-top:4px;font-weight:700}
+.gbox p{font-size:13px;color:var(--muted);margin:16px 0 14px;line-height:1.7}
+#pw{text-align:center;font-family:Consolas,monospace;letter-spacing:1px;font-size:17px;padding:16px}
+.btn{background:var(--teal);color:#fff;padding:12px 20px;border-radius:12px;font-weight:800}
+.btn:active{background:var(--teal-d)}
+.btn:disabled{opacity:.6}
+.btn.w{width:100%;margin-top:14px;padding:16px;font-size:16px}
+.btn.g{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn.r{background:var(--red)}
+.btn.sm{padding:7px 12px;font-size:12px;border-radius:9px}
+.err{color:var(--red);font-size:13.5px;margin-top:14px;min-height:20px;font-weight:700;
+  text-align:center;line-height:1.6}
+
+/* اللوحة */
+#app{display:none;max-width:900px;margin:0 auto;padding:20px 15px 70px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:14px;padding:13px;border-top:3px solid var(--teal);
+  box-shadow:0 1px 3px rgba(15,23,42,.07)}
+.kpi small{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px}
+.kpi b{font-size:22px;font-weight:800}
+.panel{background:#fff;border-radius:16px;padding:17px;box-shadow:0 1px 3px rgba(15,23,42,.07);margin-bottom:16px}
+.panel h3{font-size:15.5px;font-weight:800;margin-bottom:13px}
+.bar{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.bar label{display:block;font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:5px}
+
+table{width:100%;border-collapse:collapse}
+th{padding:9px 6px;font-size:11px;text-align:right;font-weight:800;color:var(--muted);
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 6px;border-bottom:1px solid #f1f5f9;font-size:13px}
+.key{font-family:Consolas,monospace;font-weight:800;font-size:13.5px;cursor:pointer;color:var(--teal);white-space:nowrap}
+.pill{padding:4px 9px;border-radius:20px;font-size:10.5px;font-weight:800;display:inline-block;white-space:nowrap}
+.free{background:#dcfce7;color:#15803d}
+.used{background:#e0e7ff;color:#3730a3}
+.off{background:#fee2e2;color:#b91c1c}
+.empty{text-align:center;color:var(--muted);padding:34px;font-size:13.5px;line-height:1.8}
+.acts{display:flex;gap:4px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:13px 22px;border-radius:30px;font-size:14px;font-weight:700;display:none;z-index:50;
+  white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.note{background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:12px;
+  font-size:12px;line-height:1.8;color:#134e4a;margin-bottom:13px}
+.new{background:#f0fdfa;border:2px dashed var(--teal);border-radius:14px;padding:16px;margin-top:14px}
+.new .hd{font-size:11.5px;color:var(--muted);font-weight:800;text-align:center;margin-bottom:6px}
+.new .k{font-family:Consolas,monospace;font-size:22px;font-weight:800;color:var(--teal);
+  padding:10px 0;cursor:pointer;letter-spacing:1px;text-align:center}
+.new .k:active{background:#ccfbf1;border-radius:8px}
+.wa{background:#25d366;color:#fff;width:100%;padding:12px;border-radius:12px;font-weight:800;margin-top:8px}
+@media(max-width:640px){ .kpis{grid-template-columns:repeat(2,1fr)} th,td{padding:8px 4px;font-size:12px} }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gbox">
+    <div class="logo">لوحة المفاتيح<small>MEDIA PLUS</small></div>
+    <p>أدخل كلمة المرور للدخول إلى لوحة توليد مفاتيح تطبيق <b>ريّح بالك</b>.</p>
+    <input id="pw" type="password" placeholder="كلمة المرور" autocomplete="off">
+    <button class="btn w" id="go">دخول</button>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div class="logo">لوحة المفاتيح<small>ريّح بالك</small></div>
+    <button class="btn g sm" onclick="location.reload()">قفل</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><small>الإجمالي</small><b class="num" id="kTot">0</b></div>
+    <div class="kpi" style="border-color:var(--green)"><small>متاحة</small><b class="num" id="kFree">0</b></div>
+    <div class="kpi" style="border-color:var(--indigo)"><small>مفعّلة</small><b class="num" id="kUsed">0</b></div>
+    <div class="kpi" style="border-color:var(--red)"><small>موقوفة</small><b class="num" id="kOff">0</b></div>
+  </div>
+
+  <div class="panel">
+    <h3>توليد مفتاح</h3>
+    <div class="bar">
+      <div style="width:78px"><label>العدد</label><input id="cnt" type="number" value="1" min="1" max="30"></div>
+      <div style="flex:1;min-width:130px"><label>اسم الزبون</label><input id="note" placeholder="اختياري"></div>
+      <button class="btn" id="gen">توليد</button>
+    </div>
+    <div id="newKeys"></div>
+  </div>
+
+  <div class="panel">
+    <h3>كل المفاتيح</h3>
+    <div class="note">
+      اضغط المفتاح لنسخه. <b>فكّ</b> = يعيده صالحاً للتفعيل على جهاز جديد
+      (لو غيّر الزبون هاتفه أو أعاد التثبيت).
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>المفتاح</th><th>الزبون</th><th>الحالة</th><th></th></tr></thead>
+        <tbody id="rows"><tr><td colspan="4" class="empty">جارٍ التحميل...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   لوحة مفاتيح "ريّح بالك" — Media Plus
+   كلمة مرور واحدة تفتح اللوحة، وتسجّل الدخول لفايربيز
+   في الخلفية — فتبقى قواعد الحماية سليمة.
+   ═══════════════════════════════════════════════════════ */
+
+const PASS = 'sy3ncFgv7TnmMkj';
+const ACC  = { email:'sdkhyrallh08@gmail.com', pass:'sy3ncFgv7TnmMkj' };
+
+firebase.initializeApp({
+  apiKey:"AIzaSyAvlQcNAaRVAbi0fKahb7kf1_EVU-f5Lqw",
+  authDomain:"appdyon.firebaseapp.com",
+  projectId:"appdyon",
+  storageBucket:"appdyon.firebasestorage.app",
+  messagingSenderId:"238284981505",
+  appId:"1:238284981505:web:99fd2b75ed4f7c9b964700"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+const $=id=>document.getElementById(id);
+const toast=t=>{const e=$('toast');e.textContent=t;e.style.display='block';
+  setTimeout(()=>e.style.display='none',2600);};
+
+/* دخول بكلمة واحدة */
+$('go').onclick=async()=>{
+  const e=$('err'), b=$('go');
+  e.textContent='';
+  if($('pw').value !== PASS){ e.textContent='كلمة المرور غير صحيحة'; return; }
+  b.disabled=true; b.textContent='جارٍ الدخول...';
+  try{
+    await auth.signInWithEmailAndPassword(ACC.email, ACC.pass);
+    $('gate').style.display='none';
+    $('app').style.display='block';
+    loadKeys();
+  }catch(x){
+    const m={
+      'auth/invalid-credential':'حساب فايربيز غير صحيح — تأكد من البريد وكلمة المرور في Authentication',
+      'auth/user-not-found':'حساب فايربيز غير موجود',
+      'auth/wrong-password':'كلمة مرور فايربيز خاطئة',
+      'auth/operation-not-allowed':'فعّل Email/Password في Firebase Authentication',
+      'auth/network-request-failed':'لا يوجد اتصال بالإنترنت'
+    };
+    e.textContent = m[x.code] || ('خطأ: '+x.code);
+  }finally{ b.disabled=false; b.textContent='دخول'; }
+};
+$('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') $('go').click(); });
+
+/* توليد المفاتيح — حروف بلا التباس (لا O/0 ولا I/1) */
+const AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const blk=()=>Array.from({length:4},()=>AB[Math.floor(Math.random()*AB.length)]).join('');
+const newKey=()=>`MP-${blk()}-${blk()}`;
+
+let keys=[];
+async function loadKeys(){
+  try{
+    const s=await db.collection('licenses').get();
+    keys=s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    render();
+  }catch(e){
+    $('rows').innerHTML=`<tr><td colspan="4" class="empty">
+      تعذّر تحميل المفاتيح<br>تأكد من نشر قواعد Firestore<br>
+      <small style="color:var(--red)">${e.code||e.message}</small></td></tr>`;
+  }
+}
+
+function render(){
+  $('kTot').textContent=keys.length;
+  $('kFree').textContent=keys.filter(k=>!k.used&&k.active).length;
+  $('kUsed').textContent=keys.filter(k=>k.used).length;
+  $('kOff').textContent=keys.filter(k=>!k.active).length;
+
+  $('rows').innerHTML = keys.length ? keys.map(k=>{
+    const st = !k.active ? '<span class="pill off">موقوف</span>'
+             : k.used    ? '<span class="pill used">مفعّل</span>'
+                         : '<span class="pill free">متاح</span>';
+    return `<tr>
+      <td class="key" onclick="copy('${k.id}')">${k.id}</td>
+      <td>${k.note||'—'}</td>
+      <td>${st}</td>
+      <td><div class="acts">
+        ${k.used?`<button class="btn g sm" onclick="unbind('${k.id}')">فكّ</button>`:''}
+        <button class="btn g sm" onclick="toggle('${k.id}',${!k.active})">${k.active?'إيقاف':'تفعيل'}</button>
+        <button class="btn r sm" onclick="del('${k.id}')">حذف</button>
+      </div></td></tr>`;
+  }).join('') : '<tr><td colspan="4" class="empty">لا توجد مفاتيح بعد<br>ولّد أول مفتاح من الأعلى</td></tr>';
+}
+
+$('gen').onclick=async()=>{
+  const b=$('gen');
+  const n=Math.min(Math.max(+$('cnt').value||1,1),30);
+  const note=$('note').value.trim();
+  b.disabled=true; b.textContent='...';
+  const made=[];
+  try{
+    for(let i=0;i<n;i++){
+      const k=newKey();
+      await db.collection('licenses').doc(k).set({
+        used:false, active:true, device:'', note,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        activatedAt: null
+      });
+      made.push(k);
+    }
+    $('newKeys').innerHTML=`<div class="new">
+      <div class="hd">اضغط المفتاح لنسخه</div>
+      ${made.map(k=>`<div class="k" onclick="copy('${k}')">${k}</div>`).join('')}
+      <button class="wa" onclick="share('${made.join(' - ')}')">إرسال على واتساب</button>
+    </div>`;
+    $('note').value='';
+    toast('تم توليد '+made.length+' مفتاح');
+    loadKeys();
+  }catch(e){ toast('فشل التوليد: '+(e.code||e.message)); }
+  finally{ b.disabled=false; b.textContent='توليد'; }
+};
+
+function copy(k){
+  if(navigator.clipboard) navigator.clipboard.writeText(k);
+  else{
+    const t=document.createElement('textarea');
+    t.value=k; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove();
+  }
+  toast('نُسخ: '+k);
+}
+function share(k){
+  const t=`مفتاح تفعيل تطبيق *ريّح بالك*\n\n${k}\n\nافتح التطبيق والصق المفتاح ثم اضغط تفعيل.\n\n_Media Plus_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+}
+async function unbind(k){
+  if(!confirm('فكّ ارتباط هذا المفتاح؟ سيصير صالحاً للتفعيل على جهاز جديد.'))return;
+  await db.collection('licenses').doc(k).update({used:false,device:'',activatedAt:null});
+  toast('فُكّ الارتباط'); loadKeys();
+}
+async function toggle(k,a){
+  await db.collection('licenses').doc(k).update({active:a});
+  toast(a?'فُعّل':'أُوقف'); loadKeys();
+}
+async function del(k){
+  if(!confirm('حذف المفتاح نهائياً؟'))return;
+  await db.collection('licenses').doc(k).delete();
+  toast('حُذف'); loadKeys();
+}
+</script>
+</body>
+</html>
