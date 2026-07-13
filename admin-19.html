@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة التحكم — Media Plus</title>
+<style>
+:root{--teal:#0f766e;--teal-d:#115e59;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
+  --bg:#f4f6f8;--red:#dc2626;--green:#16a34a;--indigo:#4f46e5;--amber:#f59e0b}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;font-size:14px}
+input{font-family:inherit;font-size:16px;padding:13px;border:1.5px solid var(--line);
+  border-radius:12px;background:#fff;width:100%;color:var(--ink)}
+input:focus{outline:none;border-color:var(--teal)}
+.num{font-variant-numeric:tabular-nums}
+
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:radial-gradient(circle at 30% 20%,#14857a,#0c3d38 75%)}
+.gbox{background:#fff;padding:32px;border-radius:22px;width:390px;max-width:100%;
+  box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.logo{font-size:25px;font-weight:800;color:var(--teal);line-height:1.15}
+.logo small{display:block;font-size:10px;color:var(--muted);letter-spacing:2.5px;margin-top:4px;font-weight:700}
+.gbox p{font-size:13px;color:var(--muted);margin:16px 0 14px;line-height:1.7}
+#pw{text-align:center;font-family:Consolas,monospace;letter-spacing:1px;font-size:17px;padding:16px}
+.btn{background:var(--teal);color:#fff;padding:12px 20px;border-radius:11px;font-weight:800}
+.btn:active{background:var(--teal-d)}
+.btn:disabled{opacity:.6}
+.btn.w{width:100%;margin-top:14px;padding:16px;font-size:16px}
+.btn.g{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn.r{background:var(--red)}
+.btn.sm{padding:7px 12px;font-size:12px;border-radius:9px}
+.err{color:var(--red);font-size:13.5px;margin-top:14px;min-height:20px;font-weight:700;
+  text-align:center;line-height:1.6}
+
+#app{display:none;max-width:1080px;margin:0 auto;padding:20px 15px 70px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.tabs{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto}
+.tb{background:#fff;border:1.5px solid var(--line);color:var(--muted);padding:10px 18px;
+  border-radius:20px;font-size:13.5px;font-weight:800;white-space:nowrap}
+.tb.on{background:var(--teal);border-color:var(--teal);color:#fff}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+.kpi{background:#fff;border-radius:14px;padding:14px;border-top:3px solid var(--teal);
+  box-shadow:0 1px 3px rgba(15,23,42,.07)}
+.kpi small{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:5px}
+.kpi b{font-size:22px;font-weight:800}
+.k-g{border-top-color:var(--green)} .k-i{border-top-color:var(--indigo)}
+.k-r{border-top-color:var(--red)} .k-a{border-top-color:var(--amber)}
+
+.panel{background:#fff;border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(15,23,42,.07);margin-bottom:16px}
+.panel h3{font-size:15.5px;font-weight:800;margin-bottom:14px}
+.bar{display:flex;gap:9px;align-items:end;flex-wrap:wrap}
+.bar label{display:block;font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:5px}
+
+table{width:100%;border-collapse:collapse}
+th{padding:10px 7px;font-size:11px;text-align:right;font-weight:800;color:var(--muted);
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 7px;border-bottom:1px solid #f1f5f9;font-size:13px}
+tbody tr:hover td{background:#f8fafc}
+.key{font-family:Consolas,monospace;font-weight:800;font-size:13px;cursor:pointer;
+  color:var(--teal);white-space:nowrap}
+.pill{padding:4px 9px;border-radius:20px;font-size:10.5px;font-weight:800;
+  display:inline-block;white-space:nowrap}
+.free{background:#dcfce7;color:#15803d}
+.used{background:#e0e7ff;color:#3730a3}
+.off{background:#fee2e2;color:#b91c1c}
+.late{background:#fee2e2;color:#b91c1c}
+.soon{background:#fef3c7;color:#92400e}
+.empty{text-align:center;color:var(--muted);padding:36px;font-size:13.5px;line-height:1.8}
+.acts{display:flex;gap:4px;flex-wrap:wrap}
+.link{background:none;color:var(--teal);font-weight:800;font-size:12.5px;padding:4px}
+.deb{color:var(--red);font-weight:800}
+.cre{color:var(--green);font-weight:700}
+.zer{color:var(--muted)}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:13px 22px;border-radius:30px;font-size:14px;font-weight:700;display:none;z-index:60;
+  white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.note{background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:13px;
+  font-size:12.5px;line-height:1.8;color:#134e4a;margin-bottom:14px}
+.new{background:#f0fdfa;border:2px dashed var(--teal);border-radius:14px;padding:16px;margin-top:14px}
+.new .hd{font-size:11.5px;color:var(--muted);font-weight:800;text-align:center;margin-bottom:6px}
+.new .k{font-family:Consolas,monospace;font-size:20px;font-weight:800;color:var(--teal);
+  padding:10px 0;cursor:pointer;letter-spacing:1px;text-align:center}
+.wa{background:#25d366;color:#fff;width:100%;padding:12px;border-radius:12px;font-weight:800;margin-top:8px}
+
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.62);display:none;z-index:50;
+  align-items:center;justify-content:center;padding:14px}
+.modal.on{display:flex}
+.box{background:#fff;border-radius:16px;width:760px;max-width:100%;max-height:90vh;
+  overflow-y:auto;padding:22px}
+.mh{display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;gap:12px}
+.mh h3{font-size:19px;font-weight:800}
+.mh .s{font-size:12px;color:var(--muted);font-weight:600;margin-top:5px;line-height:1.8}
+h4{font-size:13.5px;font-weight:800;margin:18px 0 10px;color:var(--muted)}
+
+/* بطاقة شخص داخل تفاصيل المستخدم */
+.pc{border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ph{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;
+  cursor:pointer;gap:12px}
+.ph:hover{background:#f8fafc}
+.ph .l{min-width:0}
+.ph .l b{font-size:14.5px;font-weight:800;display:block}
+.ph .l small{font-size:11.5px;color:var(--muted);display:block;margin-top:3px}
+.ph .r{text-align:left;flex-shrink:0}
+.ph .r b{font-size:16px;font-weight:800;display:block}
+.ph .r small{font-size:10.5px;color:var(--muted);font-weight:700}
+.pb{display:none;background:#f8fafc;border-top:1px solid var(--line);padding:4px 14px}
+.pb.on{display:block}
+.pb table{font-size:12px}
+.pb td{padding:9px 4px;border-bottom:1px solid #eef2f6}
+.pb tr:last-child td{border:none}
+@media(max-width:660px){ .kpis{grid-template-columns:repeat(2,1fr)} th,td{padding:9px 4px;font-size:12px} }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gbox">
+    <div class="logo">لوحة التحكم<small>MEDIA PLUS</small></div>
+    <p>إدارة منظومة <b>ريّح بالك</b> — المفاتيح والمستخدمون.</p>
+    <input id="pw" type="password" placeholder="كلمة المرور" autocomplete="off">
+    <button class="btn w" id="go">دخول</button>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div class="logo">لوحة التحكم<small>ريّح بالك</small></div>
+    <button class="btn g sm" onclick="location.reload()">قفل</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tb on" id="tK" onclick="tab('k')">المفاتيح</button>
+    <button class="tb"    id="tU" onclick="tab('u')">المستخدمون</button>
+  </div>
+
+  <div id="vK">
+    <div class="kpis">
+      <div class="kpi"><small>الإجمالي</small><b class="num" id="kTot">0</b></div>
+      <div class="kpi k-g"><small>متاحة</small><b class="num" id="kFree">0</b></div>
+      <div class="kpi k-i"><small>مفعّلة</small><b class="num" id="kUsed">0</b></div>
+      <div class="kpi k-r"><small>موقوفة</small><b class="num" id="kOff">0</b></div>
+    </div>
+    <div class="panel">
+      <h3>توليد مفتاح</h3>
+      <div class="bar">
+        <div style="width:80px"><label>العدد</label><input id="cnt" type="number" value="1" min="1" max="30"></div>
+        <div style="flex:1;min-width:130px"><label>اسم الزبون</label><input id="note" placeholder="اختياري"></div>
+        <button class="btn" id="gen">توليد</button>
+      </div>
+      <div id="newKeys"></div>
+    </div>
+    <div class="panel">
+      <h3>كل المفاتيح</h3>
+      <div class="note">اضغط المفتاح لنسخه. <b>فكّ</b> = يفصله عن الحساب فيصير صالحاً من جديد.
+        <b>إيقاف</b> = يمنع أي دخول به.</div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>المفتاح</th><th>الزبون</th><th>الحالة</th><th>صاحبه</th><th></th></tr></thead>
+        <tbody id="kRows"><tr><td colspan="5" class="empty">جارٍ التحميل...</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div id="vU" style="display:none">
+    <div class="kpis">
+      <div class="kpi"><small>المستخدمون</small><b class="num" id="uTot">0</b></div>
+      <div class="kpi k-i"><small>مجموع الأشخاص</small><b class="num" id="uPpl">0</b></div>
+      <div class="kpi k-r"><small>مجموع الديون</small><b class="num" id="uDebt">0</b></div>
+      <div class="kpi k-a"><small>نشطون هذا الأسبوع</small><b class="num" id="uAct">0</b></div>
+    </div>
+    <div class="panel">
+      <h3>المستخدمون</h3>
+      <div class="note">البيانات محفوظة لضمان استعادتها لو فقد المستخدم هاتفه.
+        اضغط <b>عرض</b> لرؤية أشخاصه وأرصدتهم وسجل حركاتهم.</div>
+      <input id="uq" placeholder="ابحث بالاسم أو الرقم..." oninput="renderU()" style="margin-bottom:14px">
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>الاسم</th><th>المدينة</th><th>الهاتف</th><th>أشخاص</th>
+          <th>الديون</th><th>المفتاح</th><th>أجهزة</th><th></th></tr></thead>
+        <tbody id="uRows"><tr><td colspan="8" class="empty">جارٍ التحميل...</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeM()">
+  <div class="box" id="mbox"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   لوحة تحكم ريّح بالك — Media Plus
+   ═══════════════════════════════════════════════════════════ */
+
+const PASS='sy3ncFgv7TnmMkj';
+const ACC={email:'sdkhyrallh08@gmail.com',pass:'sy3ncFgv7TnmMkj'};
+
+firebase.initializeApp({
+  apiKey:"AIzaSyAvlQcNAaRVAbi0fKahb7kf1_EVU-f5Lqw",
+  authDomain:"appdyon.firebaseapp.com",
+  projectId:"appdyon",
+  storageBucket:"appdyon.firebasestorage.app",
+  messagingSenderId:"238284981505",
+  appId:"1:238284981505:web:99fd2b75ed4f7c9b964700"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+const FV=firebase.firestore.FieldValue;
+
+const $=id=>document.getElementById(id);
+const toast=t=>{const e=$('toast');e.textContent=t;e.style.display='block';
+  setTimeout(()=>e.style.display='none',2600);};
+const esc=s=>String(s??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const fmt=n=>(Math.abs(Number(n)||0)).toLocaleString('en-US',{maximumFractionDigits:2});
+const openM=h=>{$('mbox').innerHTML=h;$('modal').classList.add('on');};
+const closeM=()=>$('modal').classList.remove('on');
+const dayDiff=d=>Math.ceil((new Date(d+'T23:59:59')-new Date())/864e5);
+const dueTxt=d=>d<0?`متأخر ${Math.abs(d)} يوم`:d===0?'اليوم':d===1?'غداً':`بعد ${d} يوم`;
+
+$('go').onclick=async()=>{
+  const e=$('err'), b=$('go'); e.textContent='';
+  if($('pw').value!==PASS){ e.textContent='كلمة المرور غير صحيحة'; return; }
+  b.disabled=true; b.textContent='جارٍ الدخول...';
+  try{
+    await auth.signInWithEmailAndPassword(ACC.email,ACC.pass);
+    $('gate').style.display='none';
+    $('app').style.display='block';
+    loadAll();
+  }catch(x){
+    const m={
+      'auth/invalid-credential':'حساب فايربيز غير صحيح',
+      'auth/operation-not-allowed':'فعّل Email/Password في Firebase',
+      'auth/network-request-failed':'لا يوجد اتصال بالإنترنت'
+    };
+    e.textContent = m[x.code]||('خطأ: '+x.code);
+  }finally{ b.disabled=false; b.textContent='دخول'; }
+};
+$('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') $('go').click(); });
+
+function tab(t){
+  $('tK').classList.toggle('on',t==='k');
+  $('tU').classList.toggle('on',t==='u');
+  $('vK').style.display=t==='k'?'block':'none';
+  $('vU').style.display=t==='u'?'block':'none';
+}
+
+/* ══════════ توليد المفاتيح ══════════
+   MP-XXXX-XXXX-XXXX  ← ثلاث كتل (نحو 32 مليار احتمال)
+   • حروف وأرقام بلا التباس (لا O/0 ولا I/1/l)
+   • كل كتلة تخلط حرفاً ورقماً — لا كتلة كلها حروف أو كلها أرقام
+   • لا حرفين متتاليين متطابقين
+   • يُرفض أي مفتاح يشبه مفتاحاً قائماً (فرق حرف أو حرفين)
+   ═════════════════════════════════════ */
+const LET='ABCDEFGHJKLMNPQRSTUVWXYZ';
+const DIG='23456789';
+const pickFrom=s=>s[Math.floor(Math.random()*s.length)];
+
+function makeBlock(){
+  // كتلة من 4: حرفان ورقمان على الأقل، مخلوطة عشوائياً
+  const c=[pickFrom(LET),pickFrom(LET),pickFrom(DIG),pickFrom(DIG)];
+  for(let i=c.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [c[i],c[j]]=[c[j],c[i]];
+  }
+  return c.join('');
+}
+function rawKey(){ return `MP-${makeBlock()}-${makeBlock()}-${makeBlock()}`; }
+const bare=k=>k.replace(/[^A-Z0-9]/g,'').slice(2);   // بلا MP والشرطات
+
+function tooSimilar(k,existing){
+  const a=bare(k);
+  return existing.some(x=>{
+    const b=bare(x);
+    if(b.length!==a.length) return false;
+    let diff=0;
+    for(let i=0;i<a.length;i++) if(a[i]!==b[i]) diff++;
+    return diff<=2;                    // فرق حرف أو حرفين = متشابه جداً
+  });
+}
+function hasRepeat(k){
+  const a=bare(k);
+  for(let i=1;i<a.length;i++) if(a[i]===a[i-1]) return true;
+  return false;
+}
+function newKey(existing){
+  for(let i=0;i<400;i++){
+    const k=rawKey();
+    if(hasRepeat(k)) continue;
+    if(existing.includes(k)) continue;
+    if(tooSimilar(k,existing)) continue;
+    return k;
+  }
+  return rawKey();                     // احتياط بعيد الاحتمال
+}
+
+let keys=[], users=[];
+async function loadAll(){ await loadUsers(); await loadKeys(); }
+
+async function loadKeys(){
+  try{
+    const s=await db.collection('licenses').get();
+    keys=s.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    renderK();
+  }catch(e){
+    $('kRows').innerHTML=`<tr><td colspan="5" class="empty">تعذّر التحميل — تأكد من نشر القواعد<br>
+      <small style="color:var(--red)">${e.code||e.message}</small></td></tr>`;
+  }
+}
+async function loadUsers(){
+  try{
+    const s=await db.collection('users').get();
+    users=s.docs.map(d=>({uid:d.id,...d.data()}))
+      .sort((a,b)=>(b.lastActive?.seconds||0)-(a.lastActive?.seconds||0));
+    renderU();
+  }catch(e){
+    $('uRows').innerHTML=`<tr><td colspan="8" class="empty">تعذّر التحميل<br>
+      <small style="color:var(--red)">${e.code||e.message}</small></td></tr>`;
+  }
+}
+
+function renderK(){
+  $('kTot').textContent=keys.length;
+  $('kFree').textContent=keys.filter(k=>!k.uid&&k.active).length;
+  $('kUsed').textContent=keys.filter(k=>k.uid).length;
+  $('kOff').textContent=keys.filter(k=>!k.active).length;
+
+  $('kRows').innerHTML = keys.length ? keys.map(k=>{
+    const st = !k.active ? '<span class="pill off">موقوف</span>'
+             : k.uid     ? '<span class="pill used">مفعّل</span>'
+                         : '<span class="pill free">متاح</span>';
+    const u = users.find(x=>x.uid===k.uid);
+    return `<tr>
+      <td class="key" onclick="copy('${k.id}')">${k.id}</td>
+      <td>${esc(k.note||'—')}</td>
+      <td>${st}</td>
+      <td style="color:var(--muted)">${u?esc(u.name):'—'}</td>
+      <td><div class="acts">
+        ${k.uid?`<button class="btn g sm" onclick="unbind('${k.id}')">فكّ</button>`:''}
+        <button class="btn g sm" onclick="toggle('${k.id}',${!k.active})">${k.active?'إيقاف':'تفعيل'}</button>
+        <button class="btn r sm" onclick="del('${k.id}')">حذف</button>
+      </div></td></tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty">لا توجد مفاتيح — ولّد أول مفتاح</td></tr>';
+}
+
+function renderU(){
+  const q=($('uq').value||'').trim();
+  const list=users.filter(u=>!q||(u.name||'').includes(q)||(u.phone||'').includes(q));
+  const week=Date.now()-7*864e5;
+
+  $('uTot').textContent=users.length;
+  $('uPpl').textContent=users.reduce((a,u)=>a+(u.peopleCount||0),0);
+  $('uDebt').textContent=fmt(users.reduce((a,u)=>a+(u.totalDebt||0),0));
+  $('uAct').textContent=users.filter(u=>(u.lastActive?.seconds||0)*1000>week).length;
+
+  $('uRows').innerHTML = list.length ? list.map(u=>`<tr>
+    <td style="font-weight:700">${esc(u.name||'—')}</td>
+    <td style="color:var(--muted)">${esc(u.city||'—')}</td>
+    <td class="num" style="color:var(--muted)">${esc(u.phone||'—')}</td>
+    <td class="num">${u.peopleCount||0}</td>
+    <td class="num deb">${fmt(u.totalDebt||0)}</td>
+    <td class="key" onclick="copy('${u.key||''}')">${u.key||'—'}</td>
+    <td class="num">${(u.devices||[]).length}/2</td>
+    <td><div class="acts">
+      <button class="link" onclick="viewU('${u.uid}')">عرض</button>
+      ${(u.devices||[]).length?`<button class="btn g sm" onclick="resetDev('${u.uid}')">تصفير الأجهزة</button>`:''}
+    </div></td></tr>`).join('')
+    : '<tr><td colspan="8" class="empty">لا يوجد مستخدمون بعد</td></tr>';
+}
+
+/* ══════════ تفاصيل مستخدم — أشخاصه وأرصدتهم وحركاتهم ══════════ */
+let VP=[], VM=[];
+async function viewU(uid){
+  const u=users.find(x=>x.uid===uid);
+  openM('<div class="empty">جارٍ التحميل...</div>');
+  try{
+    const ref=db.collection('users').doc(uid);
+    const [ps,ms]=await Promise.all([
+      ref.collection('people').get(),
+      ref.collection('moves').orderBy('at').get()
+    ]);
+    VP=ps.docs.map(d=>({id:d.id,...d.data()}));
+    VM=ms.docs.map(d=>({id:d.id,...d.data()}));
+
+    const bal=id=>VM.filter(m=>m.pid===id).reduce((s,m)=>s+m.amount,0);
+    const rows=VP.map(p=>{
+      const b=bal(p.id);
+      const due=b>0.01
+        ? VM.filter(m=>m.pid===p.id&&m.amount>0&&m.due)
+            .map(m=>({due:m.due,d:dayDiff(m.due)})).sort((x,y)=>x.d-y.d)[0]
+        : null;
+      const last=VM.filter(m=>m.pid===p.id).slice(-1)[0];
+      return {...p,bal:b,due,last};
+    }).sort((a,b)=>b.bal-a.bal);
+
+    const owed=rows.filter(r=>r.bal>0).reduce((s,r)=>s+r.bal,0);
+    const owe =rows.filter(r=>r.bal<0).reduce((s,r)=>s+r.bal,0);
+    const lateN=rows.filter(r=>r.due&&r.due.d<0).length;
+
+    openM(`<div class="mh">
+      <div><h3>${esc(u.name||'—')}</h3>
+        <div class="s">${esc(u.city||'')} · ${esc(u.area||'')} · ${esc(u.phone||'')}<br>
+          المفتاح <b>${u.key||'—'}</b> · ${(u.devices||[]).length} من 2 جهاز</div></div>
+      <button class="btn g" onclick="closeM()">إغلاق</button></div>
+
+    <div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+      <div class="kpi k-i"><small>الأشخاص</small><b class="num">${VP.length}</b></div>
+      <div class="kpi k-r"><small>له عند الناس</small><b class="num">${fmt(owed)}</b></div>
+      <div class="kpi k-g"><small>عليه للناس</small><b class="num">${fmt(owe)}</b></div>
+      <div class="kpi k-a"><small>مواعيد متأخرة</small><b class="num">${lateN}</b></div>
+    </div>
+
+    <button class="btn g" style="width:100%;margin-bottom:6px"
+      onclick='dl(${JSON.stringify(JSON.stringify({user:u,people:VP,moves:VM}))},"${esc((u.name||"user").replace(/"/g,""))}")'>
+      تنزيل نسخة كاملة (لاستعادتها له)</button>
+
+    <h4>أشخاصه — اضغط أي اسم لترى حركاته</h4>
+    ${rows.length ? rows.map(r=>{
+      const col=r.bal>0.01?'deb':r.bal<-0.01?'cre':'zer';
+      const lbl=r.bal>0.01?'له عنده':r.bal<-0.01?'هو مدين له':'خالص';
+      return `<div class="pc">
+        <div class="ph" onclick="tog('${r.id}')">
+          <div class="l">
+            <b>${esc(r.name)}</b>
+            <small>${esc(r.phone||'بدون رقم')}${r.last?' · آخر حركة '+String(r.last.at).slice(0,10):''}</small>
+            ${r.due?`<span class="pill ${r.due.d<0?'late':'soon'}" style="margin-top:5px">
+              موعد ${r.due.due} · ${dueTxt(r.due.d)}</span>`:''}
+          </div>
+          <div class="r"><b class="num ${col}">${fmt(r.bal)}</b><small>${lbl}</small></div>
+        </div>
+        <div class="pb" id="pb-${r.id}">
+          <table><tbody>${
+            VM.filter(m=>m.pid===r.id).slice().reverse().map(m=>`<tr>
+              <td style="width:90px;color:var(--muted)" class="num">${String(m.at).slice(0,10)}</td>
+              <td><b class="${m.amount>0?'deb':'cre'}">${m.amount>0?'تديين':'تخليص'}</b>
+                ${m.note?`<br><small style="color:var(--muted)">${esc(m.note)}</small>`:''}
+                ${m.due?`<br><small style="color:var(--muted)">موعد ${m.due}</small>`:''}</td>
+              <td class="num ${m.amount>0?'deb':'cre'}" style="text-align:left;font-weight:800">${fmt(m.amount)}</td>
+              <td class="num" style="text-align:left;color:var(--muted);width:80px">الرصيد ${fmt(m.after)}</td>
+            </tr>`).join('') || '<tr><td class="empty">لا توجد حركات</td></tr>'
+          }</tbody></table>
+        </div>
+      </div>`;
+    }).join('') : '<div class="empty">لم يسجّل أحداً بعد</div>'}`);
+  }catch(e){
+    openM(`<div class="empty">تعذّر التحميل<br>
+      <small style="color:var(--red)">${e.code||e.message}</small><br><br>
+      <button class="btn g" onclick="closeM()">إغلاق</button></div>`);
+  }
+}
+function tog(id){ $('pb-'+id).classList.toggle('on'); }
+
+function dl(json,name){
+  const b=new Blob([json],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='rayyeh-'+String(name).replace(/\s+/g,'-')+'.json'; a.click();
+  toast('نُزّلت النسخة');
+}
+
+$('gen').onclick=async()=>{
+  const b=$('gen');
+  const n=Math.min(Math.max(+$('cnt').value||1,1),30);
+  const note=$('note').value.trim();
+  b.disabled=true; b.textContent='...';
+  const made=[];
+  const existing=keys.map(k=>k.id);
+  try{
+    for(let i=0;i<n;i++){
+      const k=newKey(existing.concat(made));
+      await db.collection('licenses').doc(k).set({
+        used:false, active:true, uid:'', note,
+        createdAt: FV.serverTimestamp(), activatedAt: null
+      });
+      made.push(k);
+    }
+    $('newKeys').innerHTML=`<div class="new">
+      <div class="hd">اضغط المفتاح لنسخه</div>
+      ${made.map(k=>`<div class="k" onclick="copy('${k}')">${k}</div>`).join('')}
+      <button class="wa" onclick="share('${made.join(' / ')}')">إرسال على واتساب</button>
+    </div>`;
+    $('note').value='';
+    toast('تم توليد '+made.length+' مفتاح');
+    loadKeys();
+  }catch(e){ toast('فشل التوليد: '+(e.code||e.message)); }
+  finally{ b.disabled=false; b.textContent='توليد'; }
+};
+
+function copy(k){
+  if(!k) return;
+  if(navigator.clipboard) navigator.clipboard.writeText(k);
+  else{
+    const t=document.createElement('textarea');
+    t.value=k; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove();
+  }
+  toast('نُسخ: '+k);
+}
+function share(k){
+  const t=`مفتاح تفعيل منظومة *ريّح بالك*\n\n${k}\n\nافتح المنظومة، اختر «حساب جديد»، واملأ بياناتك مع هذا المفتاح.\n\n_Media Plus_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+}
+async function unbind(k){
+  if(!confirm('فكّ ارتباط هذا المفتاح عن الحساب؟'))return;
+  const key=keys.find(x=>x.id===k);
+  if(key?.uid) await db.collection('users').doc(key.uid).set({key:'',devices:[]},{merge:true}).catch(()=>{});
+  await db.collection('licenses').doc(k).update({used:false,uid:'',activatedAt:null});
+  toast('فُكّ الارتباط'); loadAll();
+}
+async function toggle(k,a){
+  await db.collection('licenses').doc(k).update({active:a});
+  toast(a?'فُعّل':'أُوقف'); loadKeys();
+}
+async function del(k){
+  if(!confirm('حذف المفتاح نهائياً؟'))return;
+  await db.collection('licenses').doc(k).delete();
+  toast('حُذف'); loadKeys();
+}
+async function resetDev(uid){
+  if(!confirm('تصفير أجهزة هذا المستخدم؟ سيتمكن من الدخول من جهازين جديدين.'))return;
+  await db.collection('users').doc(uid).set({devices:[]},{merge:true});
+  toast('صُفّرت الأجهزة'); loadUsers();
+}
+</script>
+</body>
+</html>
